@@ -9,33 +9,73 @@ import XCTest
 
 final class UalaCitiesInterviewUITests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    private var app: XCUIApplication!
 
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+    override func setUp() {
         continueAfterFailure = false
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app = XCUIApplication()
+        app.launchArguments.append("UI-TESTING")
         app.launch()
+    }
+    
+    func testShowCitiesList() {
+        let list = app.collectionViews["CityListView_ID"]
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(list.exists)
+
+        XCTAssertEqual(list.cells.count, 3)
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
+    func testShowFavorites() {
+        let favoritesButton = app.buttons["ShowFavoritesButton_ID"]
+        
+        XCTAssertTrue(favoritesButton.exists)
+        
+        favoritesButton.tap()
+    }
+    
+    func testToggleFavorite() {
+        let list = app.collectionViews["CityListView_ID"]
+        
+        XCTAssertTrue(list.exists)
+
+        XCTAssertEqual(list.cells.count, 3)
+        
+        let favoritesButton = app.buttons["ShowFavoritesButton_ID"]
+        
+        XCTAssertTrue(favoritesButton.exists)
+        
+        favoritesButton.tap()
+        
+        let firstRow = list.cells.element(boundBy: 0)
+        
+        let toggleFavoriteButton = firstRow.buttons["ToggleFavoriteButton_ID"]
+        
+        XCTAssertTrue(toggleFavoriteButton.exists)
+        
+        toggleFavoriteButton.tap()
+        
+        XCTAssertEqual(list.cells.count, 2)
+    }
+    
+    func testSeachInCityList() {
+        let list = app.collectionViews["CityListView_ID"]
+        
+        XCTAssertTrue(list.exists)
+
+        XCTAssertEqual(list.cells.count, 3)
+        
+        let searchField = app.searchFields.firstMatch
+        
+        XCTAssertTrue(searchField.exists)
+        
+        searchField.tap()
+        searchField.typeText("B")
+        
+        XCTAssertEqual(list.cells.count, 1)
+        
+        let cell = list.cells.element(boundBy: 0)
+        XCTAssertTrue(cell.staticTexts["Buenos Aires AR"].exists)
     }
 }
